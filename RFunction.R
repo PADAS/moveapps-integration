@@ -67,7 +67,7 @@ rFunction = function(data,
   }
   
   
-  ### -- Get event fields to include in upload
+  ### -- Process fields chosen to be included in upload as event details
   if(is.null(eventlist_fields) || (length(eventlist_fields) == 1 && nchar(eventlist_fields) == 0)){
     event_fields <- names(data_orig)
   }else {
@@ -75,7 +75,11 @@ rFunction = function(data,
     event_fields_parsed <- unlist(strsplit(eventlist_fields,",|;")) 
     event_fields <- gsub("\\s+", "", event_fields_parsed)
   }
-
+  
+  # forcing names of all chosen fields to lower case, as per ER requirement
+  data <- dplyr::rename_with(data, tolower, .cols = dplyr::any_of(event_fields))
+  event_fields <- tolower(event_fields)
+  
   
   ### -- Process expected lat lon columns
   if("location_long" %!in% names(data)){
@@ -131,8 +135,11 @@ rFunction = function(data,
     dplyr::mutate(
       location = lapply(location, as.list),
       event_details = lapply(event_details, as.list),
+      # bring any double-listed elements of length 1, generated from nesting on
+      # list-columns, 1-level up. This ensures arrays don't get double-wrapped
+      # in json coercion
       event_details = purrr::modify_depth(event_details, 2, function(x){
-        if(is.list(x) && length(x) == 1 && is.data.frame(x[[1]])){
+        if(is.list(x) && length(x) == 1){
           x <- x[[1]]
         } 
         x
@@ -209,9 +216,9 @@ rFunction = function(data,
         #browser()
         
         # coerce current batch to json
-        er_json_str <- batch_dt |> 
-          dplyr::select(device_id, recorded_at, location, event_details) |> 
-          jsonify::to_json(unbox = TRUE, numeric_dates = FALSE, digits = 4) |> 
+        er_json_str <- batch_dt |>
+          dplyr::select(device_id, recorded_at, location, event_details) |>
+          jsonify::to_json(unbox = TRUE, numeric_dates = FALSE, digits = 4) |>
           toString()
         
         # post request

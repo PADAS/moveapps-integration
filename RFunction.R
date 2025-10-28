@@ -76,11 +76,6 @@ rFunction = function(data,
     event_fields <- gsub("\\s+", "", event_fields_parsed)
   }
   
-  # forcing names of all chosen fields to lower case, as per ER requirement
-  data <- dplyr::rename_with(data, tolower, .cols = dplyr::any_of(event_fields))
-  event_fields <- tolower(event_fields)
-  
-  
   ### -- Process expected lat lon columns
   if("location_long" %!in% names(data)){
     

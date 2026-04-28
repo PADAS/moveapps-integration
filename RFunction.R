@@ -155,7 +155,7 @@ rFunction = function(data,
   json_row <- data_jsonble |> 
     dplyr::slice(1) |> 
     dplyr::select(device_id, recorded_at, location, event_details) |> 
-    jsonify::to_json(unbox = TRUE, digits = 4, numeric_dates = FALSE) |> 
+    jsonify::to_json(unbox = TRUE, digits = 6, numeric_dates = FALSE) |> 
     toString()
   
   #### get size of sample entry in bytes
@@ -213,7 +213,7 @@ rFunction = function(data,
         # coerce current batch to json
         er_json_str <- batch_dt |>
           dplyr::select(device_id, recorded_at, location, event_details) |>
-          jsonify::to_json(unbox = TRUE, numeric_dates = FALSE, digits = 4) |>
+          jsonify::to_json(unbox = TRUE, numeric_dates = FALSE, digits = 6) |>
           toString()
         
         # post request

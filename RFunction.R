@@ -223,6 +223,7 @@ rFunction = function(data,
             apikey = api_key,
             "accept" = "application/json",
             "content-type" = "application/json"),
+          httr::timeout(30*3600), # set max request time to 30mins
           body = er_json_str
         )
 
